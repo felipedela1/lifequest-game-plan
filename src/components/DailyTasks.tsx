@@ -1,12 +1,11 @@
+import { useState } from "react";
+import { CheckCircle2, Circle, Trophy, Star } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import type { Tables } from "@/integrations/supabase/types";
 
-import { useState } from 'react';
-import { CheckCircle2, Circle, Trophy, Star } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import type { Tables } from '@/integrations/supabase/types';
-
-type Task = Tables<'tasks'>;
+type Task = Tables<"tasks">;
 
 interface DailyTasksProps {
   tasks: Task[];
@@ -14,26 +13,27 @@ interface DailyTasksProps {
 }
 
 export const DailyTasks = ({ tasks, onTaskComplete }: DailyTasksProps) => {
-  const [completingTask, setCompletingTask] = useState<string | null>(null);
+  const [completingTasks, setCompletingTasks] = useState<string[]>([]);
 
   const handleTaskComplete = async (taskId: string) => {
-    setCompletingTask(taskId);
-    // Simulate API call delay
+    setCompletingTasks((prev) => [...prev, taskId]);
     setTimeout(() => {
       onTaskComplete(taskId);
-      setCompletingTask(null);
+      setCompletingTasks((prev) => prev.filter((id) => id !== taskId));
     }, 800);
   };
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      'Salud': 'bg-green-100 text-green-800',
-      'Productividad': 'bg-blue-100 text-blue-800',
-      'Aprendizaje': 'bg-purple-100 text-purple-800',
-      'Bienestar': 'bg-pink-100 text-pink-800',
-      'Ejercicio': 'bg-red-100 text-red-800'
+      Salud: "bg-green-100 text-green-800",
+      Productividad: "bg-blue-100 text-blue-800",
+      Aprendizaje: "bg-purple-100 text-purple-800",
+      Bienestar: "bg-pink-100 text-pink-800",
+      Ejercicio: "bg-red-100 text-red-800",
     };
-    return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    return (
+      colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800"
+    );
   };
 
   if (tasks.length === 0) {
@@ -71,12 +71,12 @@ export const DailyTasks = ({ tasks, onTaskComplete }: DailyTasksProps) => {
       <CardContent>
         <div className="space-y-4">
           {tasks.map((task) => (
-            <div 
-              key={task.id} 
+            <div
+              key={task.id}
               className={`p-4 rounded-lg border-2 transition-all duration-300 ${
-                task.completed 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-white border-gray-200 hover:border-purple-300 hover:shadow-md'
+                task.completed
+                  ? "bg-green-50 border-green-200"
+                  : "bg-white border-gray-200 hover:border-purple-300 hover:shadow-md"
               }`}
             >
               <div className="flex items-start justify-between">
@@ -85,24 +85,42 @@ export const DailyTasks = ({ tasks, onTaskComplete }: DailyTasksProps) => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => !task.completed && handleTaskComplete(task.id)}
-                      disabled={task.completed || completingTask === task.id}
+                      onClick={() =>
+                        !task.completed && handleTaskComplete(task.id)
+                      }
+                      disabled={
+                        task.completed || completingTasks.includes(task.id)
+                      }
                       className="p-0 h-auto hover:bg-transparent"
                     >
                       {task.completed ? (
                         <CheckCircle2 className="w-6 h-6 text-green-600" />
                       ) : (
-                        <Circle className={`w-6 h-6 ${
-                          completingTask === task.id ? 'text-purple-600 animate-pulse' : 'text-gray-400 hover:text-purple-600'
-                        }`} />
+                        <Circle
+                          className={`w-6 h-6 ${
+                            completingTasks.includes(task.id)
+                              ? "text-purple-600 animate-pulse"
+                              : "text-gray-400 hover:text-purple-600"
+                          }`}
+                        />
                       )}
                     </Button>
                     <div>
-                      <h3 className={`font-semibold ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                      <h3
+                        className={`font-semibold ${
+                          task.completed
+                            ? "line-through text-gray-500"
+                            : "text-gray-800"
+                        }`}
+                      >
                         {task.title}
                       </h3>
                       {task.description && (
-                        <p className={`text-sm ${task.completed ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p
+                          className={`text-sm ${
+                            task.completed ? "text-gray-400" : "text-gray-600"
+                          }`}
+                        >
                           {task.description}
                         </p>
                       )}
