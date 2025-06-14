@@ -15,6 +15,7 @@ import { useAppSettings } from "@/hooks/useAppSettings";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LogOut, Plus } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -80,32 +81,28 @@ const Index = () => {
   };
 
   const handleCreateDemoTasks = async () => {
-    const demoTasks = [
-      {
-        title: "Hacer 30 minutos de ejercicio",
-        description: "Cualquier actividad física que te haga sudar",
-        category: "Salud",
-        difficulty: "normal" as const,
-        estimated_duration: 30,
-      },
-      {
-        title: "Leer 20 páginas de un libro",
-        description: "Continúa con tu lectura actual o empieza uno nuevo",
-        category: "Aprendizaje",
-        difficulty: "easy" as const,
-        estimated_duration: 45,
-      },
-      {
-        title: "Meditar 10 minutos",
-        description: "Practica mindfulness o meditación guiada",
-        category: "Bienestar",
-        difficulty: "easy" as const,
-        estimated_duration: 10,
-      },
-    ];
+    const { data, error } = await supabase.from('demo_tasks').select('*');
+
+    if (error) {
+      console.error('Error fetching demo tasks:', error);
+      toast.error('No se pudieron cargar las tareas de ejemplo');
+      return;
+    }
+
+    const demoTasks = data || [];
 
     for (const task of demoTasks) {
-      await createTask(task);
+      await createTask({
+        title: task.title,
+        description: task.description || undefined,
+        category: task.category,
+        priority: task.priority || undefined,
+        difficulty: task.difficulty || undefined,
+        estimated_duration: task.estimated_duration || undefined,
+        tags: task.tags || undefined,
+        notes: task.notes || undefined,
+        xp_reward: task.xp_reward,
+      });
     }
 
     toast.success("¡Tareas de ejemplo creadas!");
