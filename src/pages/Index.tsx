@@ -90,22 +90,26 @@ const Index = () => {
     }
 
     const demoTasks = data || [];
-
-    for (const task of demoTasks) {
-      await createTask({
-        title: task.title,
-        description: task.description || undefined,
-        category: task.category,
-        priority: task.priority || undefined,
-        difficulty: task.difficulty || undefined,
-        estimated_duration: task.estimated_duration || undefined,
-        tags: task.tags || undefined,
-        notes: task.notes || undefined,
-        xp_reward: task.xp_reward,
-      });
+    if (demoTasks.length === 0) {
+      toast.error('No hay tareas de ejemplo disponibles');
+      return;
     }
 
-    toast.success("¡Tareas de ejemplo creadas!");
+    const task = demoTasks[Math.floor(Math.random() * demoTasks.length)];
+
+    await createTask({
+      title: task.title,
+      description: task.description || undefined,
+      category: task.category,
+      priority: task.priority || undefined,
+      difficulty: task.difficulty || undefined,
+      estimated_duration: task.estimated_duration || undefined,
+      tags: task.tags || undefined,
+      notes: task.notes || undefined,
+      xp_reward: task.xp_reward,
+    });
+
+    toast.success("¡Tarea de ejemplo creada!");
   };
 
   const handleSignOut = async () => {
