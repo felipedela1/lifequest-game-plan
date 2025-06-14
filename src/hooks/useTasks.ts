@@ -17,6 +17,7 @@ interface CreateTaskData {
   estimated_duration?: number;
   tags?: string[];
   notes?: string;
+  xp_reward?: number;
 }
 
 export const useTasks = () => {
@@ -107,7 +108,10 @@ export const useTasks = () => {
   const createTask = async (taskData: CreateTaskData) => {
     if (!user) return;
 
-    const xpReward = calculateXPReward(taskData.difficulty);
+    const xpReward =
+      typeof taskData.xp_reward === 'number'
+        ? taskData.xp_reward
+        : calculateXPReward(taskData.difficulty);
 
     try {
       const { data, error } = await supabase
