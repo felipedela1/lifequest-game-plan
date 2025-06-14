@@ -1,4 +1,3 @@
-
 import { Trophy, Medal, Star, Crown, Shield, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +8,7 @@ interface Achievement {
   description: string;
   unlocked: boolean;
   unlockedAt?: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  rarity: string;
   category: string;
 }
 
@@ -25,7 +24,7 @@ export const Achievements = ({ achievements }: AchievementsProps) => {
       epic: 'text-purple-600 bg-purple-100',
       legendary: 'text-yellow-600 bg-yellow-100'
     };
-    return colors[rarity as keyof typeof colors];
+    return colors[rarity as keyof typeof colors] || 'text-gray-600 bg-gray-100';
   };
 
   const getRarityIcon = (rarity: string) => {
@@ -35,7 +34,7 @@ export const Achievements = ({ achievements }: AchievementsProps) => {
       epic: Crown,
       legendary: Trophy
     };
-    return icons[rarity as keyof typeof icons];
+    return icons[rarity as keyof typeof icons] || Medal;
   };
 
   const unlockedAchievements = achievements.filter(a => a.unlocked);
