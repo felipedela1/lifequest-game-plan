@@ -81,6 +81,24 @@ const Index = () => {
   };
 
   const handleCreateDemoTasks = async () => {
+
+    const { data, error } = await supabase
+      .from("demo_tasks")
+      .select("*");
+
+    if (error) {
+      console.error("Error fetching demo tasks:", error);
+      toast.error("No se pudieron cargar las tareas de ejemplo");
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      toast.error("No hay tareas de ejemplo disponibles");
+      return;
+    }
+
+    const task = data[Math.floor(Math.random() * data.length)];
+
     const { data, error } = await supabase.from('demo_tasks').select('*');
 
     if (error) {
