@@ -26,9 +26,16 @@ CREATE TABLE IF NOT EXISTS public.demo_tasks (
 -- Habilitar RLS y política de solo lectura en demo_tasks
 ALTER TABLE public.demo_tasks ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Todos pueden ver demo_tasks" ON public.demo_tasks
-  FOR SELECT TO authenticated
-  USING (true);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Todos pueden ver demo_tasks' AND tablename = 'demo_tasks'
+  ) THEN
+    CREATE POLICY "Todos pueden ver demo_tasks" ON public.demo_tasks
+      FOR SELECT TO authenticated
+      USING (true);
+  END IF;
+END $$;
 
 -- Create tasks table (con enlace a demo_tasks)
 CREATE TABLE IF NOT EXISTS public.tasks (
@@ -111,48 +118,110 @@ ALTER TABLE public.user_achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_stats ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies for profiles
-CREATE POLICY IF NOT EXISTS "Users can view their own profile" ON public.profiles
-  FOR SELECT USING (auth.uid() = id);
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can view their own profile' AND tablename = 'profiles'
+  ) THEN
+    CREATE POLICY "Users can view their own profile" ON public.profiles
+      FOR SELECT USING (auth.uid() = id);
+  END IF;
 
-CREATE POLICY IF NOT EXISTS "Users can update their own profile" ON public.profiles
-  FOR UPDATE USING (auth.uid() = id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can update their own profile' AND tablename = 'profiles'
+  ) THEN
+    CREATE POLICY "Users can update their own profile" ON public.profiles
+      FOR UPDATE USING (auth.uid() = id);
+  END IF;
 
-CREATE POLICY IF NOT EXISTS "Users can insert their own profile" ON public.profiles
-  FOR INSERT WITH CHECK (auth.uid() = id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert their own profile' AND tablename = 'profiles'
+  ) THEN
+    CREATE POLICY "Users can insert their own profile" ON public.profiles
+      FOR INSERT WITH CHECK (auth.uid() = id);
+  END IF;
+END $$;
 
 -- RLS policies for tasks
-CREATE POLICY IF NOT EXISTS "Users can view their own tasks" ON public.tasks
-  FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can view their own tasks' AND tablename = 'tasks'
+  ) THEN
+    CREATE POLICY "Users can view their own tasks" ON public.tasks
+      FOR SELECT USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY IF NOT EXISTS "Users can create their own tasks" ON public.tasks
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can create their own tasks' AND tablename = 'tasks'
+  ) THEN
+    CREATE POLICY "Users can create their own tasks" ON public.tasks
+      FOR INSERT WITH CHECK (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY IF NOT EXISTS "Users can update their own tasks" ON public.tasks
-  FOR UPDATE USING (auth.uid() = user_id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can update their own tasks' AND tablename = 'tasks'
+  ) THEN
+    CREATE POLICY "Users can update their own tasks" ON public.tasks
+      FOR UPDATE USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own tasks" ON public.tasks
-  FOR DELETE USING (auth.uid() = user_id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can delete their own tasks' AND tablename = 'tasks'
+  ) THEN
+    CREATE POLICY "Users can delete their own tasks" ON public.tasks
+      FOR DELETE USING (auth.uid() = user_id);
+  END IF;
+END $$;
 
 -- RLS policies for user_achievements
-CREATE POLICY IF NOT EXISTS "Users can view their own achievements" ON public.user_achievements
-  FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can view their own achievements' AND tablename = 'user_achievements'
+  ) THEN
+    CREATE POLICY "Users can view their own achievements" ON public.user_achievements
+      FOR SELECT USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY IF NOT EXISTS "Users can create their own achievements" ON public.user_achievements
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can create their own achievements' AND tablename = 'user_achievements'
+  ) THEN
+    CREATE POLICY "Users can create their own achievements" ON public.user_achievements
+      FOR INSERT WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
 
 -- RLS policies for user_stats
-CREATE POLICY IF NOT EXISTS "Users can view their own stats" ON public.user_stats
-  FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can view their own stats' AND tablename = 'user_stats'
+  ) THEN
+    CREATE POLICY "Users can view their own stats" ON public.user_stats
+      FOR SELECT USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY IF NOT EXISTS "Users can update their own stats" ON public.user_stats
-  FOR UPDATE USING (auth.uid() = user_id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can update their own stats' AND tablename = 'user_stats'
+  ) THEN
+    CREATE POLICY "Users can update their own stats" ON public.user_stats
+      FOR UPDATE USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY IF NOT EXISTS "Users can insert their own stats" ON public.user_stats
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert their own stats' AND tablename = 'user_stats'
+  ) THEN
+    CREATE POLICY "Users can insert their own stats" ON public.user_stats
+      FOR INSERT WITH CHECK (auth.uid() = user_id);
+  END IF;
+END $$;
 
 -- Achievements table is readable by all authenticated users
-CREATE POLICY IF NOT EXISTS "Everyone can view achievements" ON public.achievements
-  FOR SELECT TO authenticated USING (true);
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Everyone can view achievements' AND tablename = 'achievements'
+  ) THEN
+    CREATE POLICY "Everyone can view achievements" ON public.achievements
+      FOR SELECT TO authenticated USING (true);
+  END IF;
+END $$;
 
 -- Create function to handle new user registration
 CREATE OR REPLACE FUNCTION public.handle_new_user()
