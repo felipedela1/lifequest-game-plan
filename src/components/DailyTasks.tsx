@@ -4,15 +4,9 @@ import { CheckCircle2, Circle, Trophy, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  xpReward: number;
-  completed: boolean;
-  category: string;
-}
+type Task = Tables<'tasks'>;
 
 interface DailyTasksProps {
   tasks: Task[];
@@ -41,6 +35,30 @@ export const DailyTasks = ({ tasks, onTaskComplete }: DailyTasksProps) => {
     };
     return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
+
+  if (tasks.length === 0) {
+    return (
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-800">
+            <Trophy className="w-6 h-6 text-game-accent" />
+            Misiones Diarias
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-600 mb-2">
+              No hay tareas disponibles
+            </h3>
+            <p className="text-gray-500">
+              Crea algunas tareas de ejemplo para comenzar tu aventura
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="glass-card">
@@ -83,9 +101,11 @@ export const DailyTasks = ({ tasks, onTaskComplete }: DailyTasksProps) => {
                       <h3 className={`font-semibold ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
                         {task.title}
                       </h3>
-                      <p className={`text-sm ${task.completed ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {task.description}
-                      </p>
+                      {task.description && (
+                        <p className={`text-sm ${task.completed ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {task.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-9">
@@ -94,7 +114,7 @@ export const DailyTasks = ({ tasks, onTaskComplete }: DailyTasksProps) => {
                     </Badge>
                     <div className="flex items-center gap-1 text-sm font-medium text-game-xp">
                       <Star className="w-4 h-4" />
-                      {task.xpReward} XP
+                      {task.xp_reward} XP
                     </div>
                   </div>
                 </div>

@@ -41,6 +41,14 @@ export const Achievements = ({ achievements }: AchievementsProps) => {
   const unlockedAchievements = achievements.filter(a => a.unlocked);
   const lockedAchievements = achievements.filter(a => !a.unlocked);
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short'
+    });
+  };
+
   return (
     <Card className="glass-card">
       <CardHeader>
@@ -50,7 +58,7 @@ export const Achievements = ({ achievements }: AchievementsProps) => {
             Logros ({unlockedAchievements.length}/{achievements.length})
           </div>
           <Badge variant="secondary" className="bg-gradient-to-r from-game-primary to-purple-600 text-white">
-            {Math.round((unlockedAchievements.length / achievements.length) * 100)}% Completado
+            {achievements.length > 0 ? Math.round((unlockedAchievements.length / achievements.length) * 100) : 0}% Completado
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -83,7 +91,7 @@ export const Achievements = ({ achievements }: AchievementsProps) => {
                               {achievement.rarity}
                             </Badge>
                             <span className="text-xs text-gray-500">
-                              {achievement.unlockedAt}
+                              {formatDate(achievement.unlockedAt)}
                             </span>
                           </div>
                         </div>
@@ -126,6 +134,18 @@ export const Achievements = ({ achievements }: AchievementsProps) => {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {achievements.length === 0 && (
+            <div className="text-center py-8">
+              <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                No hay logros disponibles
+              </h3>
+              <p className="text-gray-500">
+                Los logros aparecerán cuando completes tareas
+              </p>
             </div>
           )}
         </div>

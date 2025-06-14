@@ -1,184 +1,150 @@
 
-import { useState } from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/Header';
 import { StatsOverview } from '@/components/StatsOverview';
 import { DailyTasks } from '@/components/DailyTasks';
 import { Achievements } from '@/components/Achievements';
 import { ProgressChart } from '@/components/ProgressChart';
+import { useUserStats } from '@/hooks/useUserStats';
+import { useTasks } from '@/hooks/useTasks';
+import { useAchievements } from '@/hooks/useAchievements';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { LogOut, Plus } from 'lucide-react';
 
 const Index = () => {
-  const [userStats, setUserStats] = useState({
-    level: 12,
-    currentXP: 850,
-    xpToNextLevel: 1000,
-    totalXP: 15420,
-    tasksCompleted: 8,
-    totalTasks: 12,
-    streak: 7
-  });
+  const { user, loading: authLoading, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { stats, loading: statsLoading, updateStats } = useUserStats();
+  const { tasks, loading: tasksLoading, completeTask, createTask } = useTasks();
+  const { achievements, loading: achievementsLoading } = useAchievements();
 
-  const [tasks, setTasks] = useState([
-    {
-      id: '1',
-      title: 'Hacer 30 minutos de ejercicio',
-      description: 'Cualquier actividad física que te haga sudar',
-      xpReward: 50,
-      completed: true,
-      category: 'Salud'
-    },
-    {
-      id: '2',
-      title: 'Leer 20 páginas de un libro',
-      description: 'Continúa con tu lectura actual o empieza uno nuevo',
-      xpReward: 40,
-      completed: false,
-      category: 'Aprendizaje'
-    },
-    {
-      id: '3',
-      title: 'Meditar 10 minutos',
-      description: 'Practica mindfulness o meditación guiada',
-      xpReward: 35,
-      completed: true,
-      category: 'Bienestar'
-    },
-    {
-      id: '4',
-      title: 'Completar 3 tareas importantes',
-      description: 'Enfócate en las tareas más importantes del día',
-      xpReward: 60,
-      completed: false,
-      category: 'Productividad'
-    },
-    {
-      id: '5',
-      title: 'Beber 2 litros de agua',
-      description: 'Mantente hidratado durante todo el día',
-      xpReward: 25,
-      completed: true,
-      category: 'Salud'
-    },
-    {
-      id: '6',
-      title: 'Escribir en el diario',
-      description: 'Reflexiona sobre tu día y tus pensamientos',
-      xpReward: 30,
-      completed: false,
-      category: 'Bienestar'
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
     }
-  ]);
+  }, [user, authLoading, navigate]);
 
-  const [achievements] = useState([
-    {
-      id: '1',
-      title: 'Primer Paso',
-      description: 'Completa tu primera tarea',
-      unlocked: true,
-      unlockedAt: 'Hace 2 semanas',
-      rarity: 'common' as const,
-      category: 'Inicio'
-    },
-    {
-      id: '2',
-      title: 'Racha de Fuego',
-      description: 'Mantén una racha de 7 días',
-      unlocked: true,
-      unlockedAt: 'Hace 3 días',
-      rarity: 'rare' as const,
-      category: 'Consistencia'
-    },
-    {
-      id: '3',
-      title: 'Maestro de la Productividad',
-      description: 'Completa 50 tareas de productividad',
-      unlocked: true,
-      unlockedAt: 'Hace 1 semana',
-      rarity: 'epic' as const,
-      category: 'Productividad'
-    },
-    {
-      id: '4',
-      title: 'Leyenda del Fitness',
-      description: 'Ejercítate durante 30 días consecutivos',
-      unlocked: false,
-      rarity: 'legendary' as const,
-      category: 'Salud'
-    },
-    {
-      id: '5',
-      title: 'Aprendiz Eterno',
-      description: 'Lee 10 libros completos',
-      unlocked: false,
-      rarity: 'epic' as const,
-      category: 'Aprendizaje'
-    },
-    {
-      id: '6',
-      title: 'Zen Master',
-      description: 'Medita durante 100 días',
-      unlocked: false,
-      rarity: 'legendary' as const,
-      category: 'Bienestar'
-    }
-  ]);
+  const handleTaskComplete = async (taskId: string) => {
+    const completedTask = await completeTask(taskId);
+    if (!completedTask || !stats) return;
 
-  const handleTaskComplete = (taskId: string) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
-        task.id === taskId 
-          ? { ...task, completed: true }
-          : task
-      )
-    );
+    const newXP = stats.current_xp + completedTask.xp_reward;
+    const xpToNextLevel = stats.level * 1000; // Simple formula for leveling
+    
+    let newLevel = stats.level;
+    let finalXP = newXP;
 
-    const completedTask = tasks.find(task => task.id === taskId);
-    if (completedTask) {
-      setUserStats(prev => ({
-        ...prev,
-        currentXP: prev.currentXP + completedTask.xpReward,
-        totalXP: prev.totalXP + completedTask.xpReward,
-        tasksCompleted: prev.tasksCompleted + 1
-      }));
-
-      toast.success(`¡Tarea completada! +${completedTask.xpReward} XP`, {
-        description: completedTask.title,
-        duration: 3000,
+    // Check for level up
+    if (newXP >= xpToNextLevel) {
+      newLevel = stats.level + 1;
+      finalXP = newXP - xpToNextLevel;
+      
+      toast.success('¡Subiste de nivel!', {
+        description: `¡Felicidades! Ahora eres nivel ${newLevel}`,
+        duration: 5000,
       });
-
-      // Check for level up
-      if (userStats.currentXP + completedTask.xpReward >= userStats.xpToNextLevel) {
-        setTimeout(() => {
-          toast.success('¡Subiste de nivel!', {
-            description: `¡Felicidades! Ahora eres nivel ${userStats.level + 1}`,
-            duration: 5000,
-          });
-          setUserStats(prev => ({
-            ...prev,
-            level: prev.level + 1,
-            currentXP: (prev.currentXP + completedTask.xpReward) - prev.xpToNextLevel,
-            xpToNextLevel: prev.xpToNextLevel + 200
-          }));
-        }, 1000);
-      }
     }
+
+    await updateStats({
+      current_xp: finalXP,
+      total_xp: stats.total_xp + completedTask.xp_reward,
+      level: newLevel
+    });
+
+    toast.success(`¡Tarea completada! +${completedTask.xp_reward} XP`, {
+      description: completedTask.title,
+      duration: 3000,
+    });
   };
+
+  const handleCreateDemoTasks = async () => {
+    const demoTasks = [
+      {
+        title: 'Hacer 30 minutos de ejercicio',
+        description: 'Cualquier actividad física que te haga sudar',
+        xp_reward: 50,
+        category: 'Salud'
+      },
+      {
+        title: 'Leer 20 páginas de un libro',
+        description: 'Continúa con tu lectura actual o empieza uno nuevo',
+        xp_reward: 40,
+        category: 'Aprendizaje'
+      },
+      {
+        title: 'Meditar 10 minutos',
+        description: 'Practica mindfulness o meditación guiada',
+        xp_reward: 35,
+        category: 'Bienestar'
+      }
+    ];
+
+    for (const task of demoTasks) {
+      await createTask(task);
+    }
+
+    toast.success('¡Tareas de ejemplo creadas!');
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  if (authLoading || statsLoading || tasksLoading || achievementsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Cargando...</div>
+      </div>
+    );
+  }
+
+  if (!user || !stats) {
+    return null;
+  }
+
+  const completedTasks = tasks.filter(task => task.completed).length;
+  const totalTasks = tasks.length;
 
   return (
     <div className="min-h-screen p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex gap-2">
+            {tasks.length === 0 && (
+              <Button 
+                onClick={handleCreateDemoTasks}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Crear tareas de ejemplo
+              </Button>
+            )}
+          </div>
+          <Button 
+            onClick={handleSignOut}
+            variant="outline"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Cerrar sesión
+          </Button>
+        </div>
+
         <Header 
-          userLevel={userStats.level}
-          currentXP={userStats.currentXP}
-          xpToNextLevel={userStats.xpToNextLevel}
-          userName="Aventurero"
+          userLevel={stats.level}
+          currentXP={stats.current_xp}
+          xpToNextLevel={stats.level * 1000}
+          userName={user.user_metadata?.username || user.email?.split('@')[0] || 'Aventurero'}
         />
         
         <StatsOverview 
-          tasksCompleted={userStats.tasksCompleted}
-          totalTasks={userStats.totalTasks}
-          streak={userStats.streak}
-          totalXP={userStats.totalXP}
+          tasksCompleted={completedTasks}
+          totalTasks={totalTasks}
+          streak={stats.streak}
+          totalXP={stats.total_xp}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
