@@ -7,20 +7,56 @@ CREATE TABLE public.profiles (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   PRIMARY KEY (id)
 );
+-- Tabla base para plantillas de tareas
+CREATE TABLE public.demo_tasks (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  xp_reward INTEGER NOT NULL DEFAULT 0,
+  category TEXT NOT NULL,
+  difficulty TEXT DEFAULT 'normal' CHECK (difficulty IN ('easy', 'normal', 'hard', 'expert')),
+  estimated_duration INTEGER,
+  priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+  tags TEXT[],
+  notes TEXT,
+  recurring_type TEXT CHECK (recurring_type IN ('none', 'daily', 'weekly', 'monthly', 'yearly')),
+  recurring_interval INTEGER DEFAULT 1,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+);
+-- Habilitar RLS
+ALTER TABLE public.demo_tasks ENABLE ROW LEVEL SECURITY;
 
+-- Política: todos los usuarios autenticados pueden ver demo_tasks
+CREATE POLICY "Todos pueden ver demo_tasks" ON public.demo_tasks
+  FOR SELECT TO authenticated
+  USING (true);
 -- Create tasks table
 CREATE TABLE public.tasks (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  demo_task_id UUID REFERENCES public.demo_tasks(id), -- ← NUEVO: enlace con plantilla base
   title TEXT NOT NULL,
   description TEXT,
   xp_reward INTEGER NOT NULL DEFAULT 0,
   category TEXT NOT NULL,
   completed BOOLEAN NOT NULL DEFAULT false,
   completed_at TIMESTAMP WITH TIME ZONE,
+  priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+  difficulty TEXT DEFAULT 'normal' CHECK (difficulty IN ('easy', 'normal', 'hard', 'expert')),
+  due_date TIMESTAMP WITH TIME ZONE,
+  estimated_duration INTEGER,
+  actual_duration INTEGER,
+  tags TEXT[],
+  notes TEXT,
+  reminder_at TIMESTAMP WITH TIME ZONE,
+  recurring_type TEXT CHECK (recurring_type IN ('none', 'daily', 'weekly', 'monthly', 'yearly')),
+  recurring_interval INTEGER DEFAULT 1,
+  parent_task_id UUID REFERENCES public.tasks(id),
+  is_archived BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
+
 
 -- Create achievements table
 CREATE TABLE public.achievements (
