@@ -81,7 +81,9 @@ const Index = () => {
   };
 
   const handleCreateDemoTasks = async () => {
-    const { data, error } = await supabase.from('demo_tasks').select('*');
+    const { data, error } = await supabase
+      .rpc('get_random_demo_task')
+      .single();
 
     if (error) {
       console.error('Error fetching demo tasks:', error);
@@ -89,9 +91,8 @@ const Index = () => {
       return;
     }
 
-    const demoTasks = data || [];
-
-    if (demoTasks.length === 0) {
+    if (!data) {
+    const task = data;
       toast.error('No hay tareas de ejemplo disponibles');
       return;
 
