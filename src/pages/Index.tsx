@@ -81,6 +81,7 @@ const Index = () => {
   };
 
   const handleCreateDemoTasks = async () => {
+
     const { data, error } = await supabase
       .from("demo_tasks")
       .select("*");
@@ -97,6 +98,38 @@ const Index = () => {
     }
 
     const task = data[Math.floor(Math.random() * data.length)];
+
+    const { data, error } = await supabase.from('demo_tasks').select('*');
+
+    if (error) {
+      console.error('Error fetching demo tasks:', error);
+      toast.error('No se pudieron cargar las tareas de ejemplo');
+      return;
+    }
+
+    const demoTasks = data || [];
+
+    if (demoTasks.length === 0) {
+      toast.error('No hay tareas de ejemplo disponibles');
+      return;
+
+
+    for (const task of demoTasks) {
+      await createTask({
+        title: task.title,
+        description: task.description || undefined,
+        category: task.category,
+        priority: task.priority || undefined,
+        difficulty: task.difficulty || undefined,
+        estimated_duration: task.estimated_duration || undefined,
+        tags: task.tags || undefined,
+        notes: task.notes || undefined,
+        xp_reward: task.xp_reward,
+      });
+
+    }
+
+    const task = demoTasks[Math.floor(Math.random() * demoTasks.length)];
 
     await createTask({
       title: task.title,
