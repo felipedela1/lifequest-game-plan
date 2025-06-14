@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,6 +99,27 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 text-foreground min-h-screen;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-sm border border-white/20 shadow-xl;
+  }
+  
+  .game-button {
+    @apply bg-gradient-to-r from-game-primary to-purple-600 hover:from-purple-600 hover:to-game-primary 
+           text-white font-semibold py-2 px-4 rounded-lg shadow-lg transform transition-all duration-200 
+           hover:scale-105 hover:shadow-xl active:scale-95;
+  }
+  
+  .xp-bar {
+    @apply bg-gradient-to-r from-blue-500 to-cyan-500 h-3 rounded-full transition-all duration-1000 ease-out;
+  }
+  
+  .level-badge {
+    @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-1 px-3 rounded-full 
+           shadow-lg animate-glow;
   }
 }

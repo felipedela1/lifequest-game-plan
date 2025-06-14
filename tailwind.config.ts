@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Gaming colors
+				game: {
+					primary: '#8B5CF6',
+					secondary: '#06B6D4',
+					accent: '#F59E0B',
+					success: '#10B981',
+					warning: '#F59E0B',
+					danger: '#EF4444',
+					xp: '#3B82F6',
+					level: '#8B5CF6',
+					gold: '#F59E0B'
 				}
 			},
 			borderRadius: {
@@ -84,11 +97,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'xp-fill': {
+					'0%': { width: '0%' },
+					'100%': { width: 'var(--progress-width)' }
+				},
+				'bounce-subtle': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-2px)' }
+				},
+				'glow': {
+					'0%, 100%': { boxShadow: '0 0 5px rgba(139, 92, 246, 0.5)' },
+					'50%': { boxShadow: '0 0 20px rgba(139, 92, 246, 0.8)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'xp-fill': 'xp-fill 1s ease-out',
+				'bounce-subtle': 'bounce-subtle 2s ease-in-out infinite',
+				'glow': 'glow 2s ease-in-out infinite'
+			},
+			backgroundImage: {
+				'gradient-game': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+				'gradient-xp': 'linear-gradient(90deg, #3B82F6 0%, #06B6D4 100%)',
+				'gradient-level': 'linear-gradient(90deg, #8B5CF6 0%, #EC4899 100%)'
 			}
 		}
 	},
