@@ -1,15 +1,18 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/Header';
 import { StatsOverview } from '@/components/StatsOverview';
 import { DailyTasks } from '@/components/DailyTasks';
 import { Achievements } from '@/components/Achievements';
 import { ProgressChart } from '@/components/ProgressChart';
+import { CreateTaskForm } from '@/components/CreateTaskForm';
 import { useUserStats } from '@/hooks/useUserStats';
 import { useTasks } from '@/hooks/useTasks';
 import { useAchievements } from '@/hooks/useAchievements';
+import { useLevels } from '@/hooks/useLevels';
+import { useAppSettings } from '@/hooks/useAppSettings';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { LogOut, Plus } from 'lucide-react';
@@ -17,9 +20,14 @@ import { LogOut, Plus } from 'lucide-react';
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  
   const { stats, loading: statsLoading, updateStats } = useUserStats();
   const { tasks, loading: tasksLoading, completeTask, createTask } = useTasks();
   const { achievements, loading: achievementsLoading } = useAchievements();
+  const { calculateXPToNextLevel } = useLevels();
+  const { settings } = useAppSettings();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -27,12 +35,19 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
+  // Manejar confirmación de email
+  useEffect(() => {
+    if (searchParams.get('confirmed') === 'true') {
+      toast.success('¡Email confirmado exitosamente! Bienvenido a LifeQuest 🎉');
+    }
+  }, [searchParams]);
+
   const handleTaskComplete = async (taskId: string) => {
     const completedTask = await completeTask(taskId);
     if (!completedTask || !stats) return;
 
     const newXP = stats.current_xp + completedTask.xp_reward;
-    const xpToNextLevel = stats.level * 1000; // Simple formula for leveling
+    const xpToNextLevel = calculateXPToNextLevel(stats.level, stats.current_xp);
     
     let newLevel = stats.level;
     let finalXP = newXP;
@@ -51,7 +66,10 @@ const Index = () => {
     await updateStats({
       current_xp: finalXP,
       total_xp: stats.total_xp + completedTask.xp_reward,
-      level: newLevel
+      level: newLevel,
+      total_tasks_completed: (stats.total_tasks_completed || 0) + 1,
+      tasks_completed_today: (stats.tasks_completed_today || 0) + 1,
+      last_activity_date: new Date().toISOString().split('T')[0]
     });
 
     toast.success(`¡Tarea completada! +${completedTask.xp_reward} XP`, {
@@ -65,20 +83,23 @@ const Index = () => {
       {
         title: 'Hacer 30 minutos de ejercicio',
         description: 'Cualquier actividad física que te haga sudar',
-        xp_reward: 50,
-        category: 'Salud'
+        category: 'Salud',
+        difficulty: 'normal' as const,
+        estimated_duration: 30
       },
       {
         title: 'Leer 20 páginas de un libro',
         description: 'Continúa con tu lectura actual o empieza uno nuevo',
-        xp_reward: 40,
-        category: 'Aprendizaje'
+        category: 'Aprendizaje',
+        difficulty: 'easy' as const,
+        estimated_duration: 45
       },
       {
         title: 'Meditar 10 minutos',
         description: 'Practica mindfulness o meditación guiada',
-        xp_reward: 35,
-        category: 'Bienestar'
+        category: 'Bienestar',
+        difficulty: 'easy' as const,
+        estimated_duration: 10
       }
     ];
 
@@ -114,10 +135,17 @@ const Index = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-4">
           <div className="flex gap-2">
+            <Button 
+              onClick={() => setShowCreateForm(true)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nueva Tarea
+            </Button>
             {tasks.length === 0 && (
               <Button 
                 onClick={handleCreateDemoTasks}
-                className="bg-green-600 hover:bg-green-700"
+                variant="outline"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Crear tareas de ejemplo
@@ -136,7 +164,7 @@ const Index = () => {
         <Header 
           userLevel={stats.level}
           currentXP={stats.current_xp}
-          xpToNextLevel={stats.level * 1000}
+          xpToNextLevel={calculateXPToNextLevel(stats.level, stats.current_xp)}
           userName={user.user_metadata?.username || user.email?.split('@')[0] || 'Aventurero'}
         />
         
@@ -156,6 +184,12 @@ const Index = () => {
         </div>
 
         <ProgressChart />
+
+        {showCreateForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <CreateTaskForm onClose={() => setShowCreateForm(false)} />
+          </div>
+        )}
       </div>
     </div>
   );

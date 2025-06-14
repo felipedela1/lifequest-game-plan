@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -39,6 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -48,7 +50,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, username?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+    // Usar la URL actual completa para redirect
+    const redirectUrl = `${window.location.origin}/?confirmed=true`;
     
     const { error } = await supabase.auth.signUp({
       email,
@@ -56,7 +59,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          username: username || email.split('@')[0]
+          username: username || email.split('@')[0],
+          full_name: username || email.split('@')[0]
         }
       }
     });

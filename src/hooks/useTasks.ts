@@ -3,11 +3,25 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
+import { useAppSettings } from './useAppSettings';
 
 type Task = Tables<'tasks'>;
 
+interface CreateTaskData {
+  title: string;
+  description?: string;
+  category: string;
+  priority?: string;
+  difficulty?: string;
+  due_date?: string;
+  estimated_duration?: number;
+  tags?: string[];
+  notes?: string;
+}
+
 export const useTasks = () => {
   const { user } = useAuth();
+  const { settings } = useAppSettings();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,6 +37,7 @@ export const useTasks = () => {
           .from('tasks')
           .select('*')
           .eq('user_id', user.id)
+          .eq('is_archived', false)
           .order('created_at', { ascending: false });
 
         if (error) {
@@ -41,10 +56,28 @@ export const useTasks = () => {
     fetchTasks();
   }, [user]);
 
+  const calculateXPReward = (difficulty: string = 'normal') => {
+    const xpRanges = settings.task_xp_ranges || {
+      easy: [10, 25],
+      normal: [25, 50],
+      hard: [50, 100],
+      expert: [100, 200]
+    };
+
+    const range = xpRanges[difficulty] || xpRanges.normal;
+    const min = range[0];
+    const max = range[1];
+    
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
   const completeTask = async (taskId: string) => {
     if (!user) return;
 
     try {
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
       const { data, error } = await supabase
         .from('tasks')
         .update({ 
@@ -71,15 +104,18 @@ export const useTasks = () => {
     }
   };
 
-  const createTask = async (taskData: Omit<Task, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'completed' | 'completed_at'>) => {
+  const createTask = async (taskData: CreateTaskData) => {
     if (!user) return;
+
+    const xpReward = calculateXPReward(taskData.difficulty);
 
     try {
       const { data, error } = await supabase
         .from('tasks')
         .insert({
           ...taskData,
-          user_id: user.id
+          user_id: user.id,
+          xp_reward: xpReward
         })
         .select()
         .single();

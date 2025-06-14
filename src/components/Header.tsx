@@ -1,6 +1,9 @@
 
-import { User, Settings, Trophy, Target } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { useLevels } from "@/hooks/useLevels";
+import { Star, Trophy, Zap } from "lucide-react";
 
 interface HeaderProps {
   userLevel: number;
@@ -10,50 +13,88 @@ interface HeaderProps {
 }
 
 export const Header = ({ userLevel, currentXP, xpToNextLevel, userName }: HeaderProps) => {
-  const xpProgress = (currentXP / xpToNextLevel) * 100;
+  const { getLevelInfo, getNextLevelInfo, calculateXPToNextLevel } = useLevels();
+  
+  const currentLevelInfo = getLevelInfo(userLevel);
+  const nextLevelInfo = getNextLevelInfo(userLevel);
+  const actualXPToNext = calculateXPToNextLevel(userLevel, currentXP);
+  
+  const totalXPForCurrentLevel = nextLevelInfo ? 
+    nextLevelInfo.xp_required - (currentLevelInfo?.xp_required || 0) : 
+    1000;
+  
+  const progressPercentage = Math.max(0, Math.min(100, 
+    ((totalXPForCurrentLevel - actualXPToNext) / totalXPForCurrentLevel) * 100
+  ));
+
+  const getLevelIcon = (iconName?: string) => {
+    const icons = {
+      Star: Star,
+      Trophy: Trophy,
+      Zap: Zap
+    };
+    const IconComponent = iconName ? icons[iconName as keyof typeof icons] : Star;
+    return IconComponent || Star;
+  };
+
+  const LevelIcon = getLevelIcon(currentLevelInfo?.icon_name);
 
   return (
-    <header className="glass-card rounded-2xl p-6 mb-8">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-game-primary to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-            <User className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">¡Hola, {userName}!</h1>
-            <p className="text-gray-600">Continúa tu aventura de crecimiento personal</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-6">
-          <div className="text-center">
-            <div className="level-badge mb-2">
-              Nivel {userLevel}
+    <Card className="glass-card mb-8">
+      <CardContent className="p-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl"
+              style={{ backgroundColor: currentLevelInfo?.color || '#6366f1' }}
+            >
+              <LevelIcon className="w-8 h-8" />
             </div>
-            <div className="text-sm text-gray-600">
-              {currentXP}/{xpToNextLevel} XP
-            </div>
-            <div className="w-32 bg-gray-200 rounded-full h-3 mt-2">
-              <div 
-                className="xp-bar"
-                style={{ width: `${xpProgress}%` }}
-              />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">
+                ¡Hola, {userName}! 👋
+              </h1>
+              <div className="flex items-center gap-2">
+                <Badge 
+                  variant="secondary" 
+                  className="text-white"
+                  style={{ backgroundColor: currentLevelInfo?.color || '#6366f1' }}
+                >
+                  Nivel {userLevel} - {currentLevelInfo?.name || 'Aventurero'}
+                </Badge>
+                <span className="text-sm text-gray-600">
+                  {currentXP} XP
+                </span>
+              </div>
+              {currentLevelInfo?.description && (
+                <p className="text-sm text-gray-600 mt-1">
+                  {currentLevelInfo.description}
+                </p>
+              )}
             </div>
           </div>
           
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="hover:bg-purple-100">
-              <Trophy className="w-5 h-5 text-game-accent" />
-            </Button>
-            <Button variant="outline" size="icon" className="hover:bg-purple-100">
-              <Target className="w-5 h-5 text-game-primary" />
-            </Button>
-            <Button variant="outline" size="icon" className="hover:bg-purple-100">
-              <Settings className="w-5 h-5 text-gray-600" />
-            </Button>
+          <div className="w-full md:w-64">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-gray-600">
+                Progreso al siguiente nivel
+              </span>
+              <span className="text-sm text-gray-500">
+                {actualXPToNext} XP restantes
+              </span>
+            </div>
+            <Progress 
+              value={progressPercentage} 
+              className="h-3"
+            />
+            {nextLevelInfo && (
+              <div className="text-xs text-gray-500 mt-1 text-center">
+                Próximo: {nextLevelInfo.name}
+              </div>
+            )}
           </div>
         </div>
-      </div>
-    </header>
+      </CardContent>
+    </Card>
   );
 };

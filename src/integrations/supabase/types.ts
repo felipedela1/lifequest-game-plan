@@ -42,22 +42,234 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
+      app_settings: {
         Row: {
           created_at: string
+          description: string | null
           id: string
+          is_public: boolean | null
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      badges: {
+        Row: {
+          condition_data: Json
+          condition_type: string
+          created_at: string
+          description: string
+          icon_name: string
+          id: string
+          is_active: boolean | null
+          name: string
+          rarity: string
+        }
+        Insert: {
+          condition_data: Json
+          condition_type: string
+          created_at?: string
+          description: string
+          icon_name: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          rarity: string
+        }
+        Update: {
+          condition_data?: Json
+          condition_type?: string
+          created_at?: string
+          description?: string
+          icon_name?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          rarity?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          color: string
+          created_at: string
+          description: string | null
+          icon_name: string
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          icon_name: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          icon_name?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      levels: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon_name: string | null
+          id: string
+          level_number: number
+          name: string
+          rewards: Json | null
+          xp_required: number
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          level_number: number
+          name: string
+          rewards?: Json | null
+          xp_required: number
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          level_number?: number
+          name?: string
+          rewards?: Json | null
+          xp_required?: number
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          birth_date: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          is_premium: boolean | null
+          language: string | null
+          notification_email: boolean | null
+          notification_push: boolean | null
+          premium_expires_at: string | null
+          theme: string | null
+          timezone: string | null
           updated_at: string
           username: string | null
         }
         Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          birth_date?: string | null
           created_at?: string
+          full_name?: string | null
           id: string
+          is_premium?: boolean | null
+          language?: string | null
+          notification_email?: boolean | null
+          notification_push?: boolean | null
+          premium_expires_at?: string | null
+          theme?: string | null
+          timezone?: string | null
           updated_at?: string
           username?: string | null
         }
         Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          birth_date?: string | null
           created_at?: string
+          full_name?: string | null
           id?: string
+          is_premium?: boolean | null
+          language?: string | null
+          notification_email?: boolean | null
+          notification_push?: boolean | null
+          premium_expires_at?: string | null
+          theme?: string | null
+          timezone?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -65,42 +277,85 @@ export type Database = {
       }
       tasks: {
         Row: {
+          actual_duration: number | null
           category: string
           completed: boolean
           completed_at: string | null
           created_at: string
           description: string | null
+          difficulty: string | null
+          due_date: string | null
+          estimated_duration: number | null
           id: string
+          is_archived: boolean | null
+          notes: string | null
+          parent_task_id: string | null
+          priority: string | null
+          recurring_interval: number | null
+          recurring_type: string | null
+          reminder_at: string | null
+          tags: string[] | null
           title: string
           updated_at: string
           user_id: string
           xp_reward: number
         }
         Insert: {
+          actual_duration?: number | null
           category: string
           completed?: boolean
           completed_at?: string | null
           created_at?: string
           description?: string | null
+          difficulty?: string | null
+          due_date?: string | null
+          estimated_duration?: number | null
           id?: string
+          is_archived?: boolean | null
+          notes?: string | null
+          parent_task_id?: string | null
+          priority?: string | null
+          recurring_interval?: number | null
+          recurring_type?: string | null
+          reminder_at?: string | null
+          tags?: string[] | null
           title: string
           updated_at?: string
           user_id: string
           xp_reward?: number
         }
         Update: {
+          actual_duration?: number | null
           category?: string
           completed?: boolean
           completed_at?: string | null
           created_at?: string
           description?: string | null
+          difficulty?: string | null
+          due_date?: string | null
+          estimated_duration?: number | null
           id?: string
+          is_archived?: boolean | null
+          notes?: string | null
+          parent_task_id?: string | null
+          priority?: string | null
+          recurring_interval?: number | null
+          recurring_type?: string | null
+          reminder_at?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
           user_id?: string
           xp_reward?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_user_id_fkey"
             columns: ["user_id"]
@@ -146,36 +401,105 @@ export type Database = {
           },
         ]
       }
-      user_stats: {
+      user_badges: {
         Row: {
-          created_at: string
-          current_xp: number
+          badge_id: string
+          earned_at: string
           id: string
-          level: number
-          streak: number
-          total_xp: number
-          updated_at: string
           user_id: string
         }
         Insert: {
-          created_at?: string
-          current_xp?: number
+          badge_id: string
+          earned_at?: string
           id?: string
-          level?: number
-          streak?: number
-          total_xp?: number
-          updated_at?: string
           user_id: string
         }
         Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_badges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_stats: {
+        Row: {
+          average_daily_xp: number | null
+          best_streak: number | null
+          created_at: string
+          current_xp: number
+          id: string
+          last_activity_date: string | null
+          level: number
+          monthly_streak: number | null
+          streak: number
+          tasks_completed_month: number | null
+          tasks_completed_today: number | null
+          tasks_completed_week: number | null
+          time_spent_today: number | null
+          time_spent_total: number | null
+          total_tasks_completed: number | null
+          total_xp: number
+          updated_at: string
+          user_id: string
+          weekly_streak: number | null
+        }
+        Insert: {
+          average_daily_xp?: number | null
+          best_streak?: number | null
           created_at?: string
           current_xp?: number
           id?: string
+          last_activity_date?: string | null
           level?: number
+          monthly_streak?: number | null
           streak?: number
+          tasks_completed_month?: number | null
+          tasks_completed_today?: number | null
+          tasks_completed_week?: number | null
+          time_spent_today?: number | null
+          time_spent_total?: number | null
+          total_tasks_completed?: number | null
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+          weekly_streak?: number | null
+        }
+        Update: {
+          average_daily_xp?: number | null
+          best_streak?: number | null
+          created_at?: string
+          current_xp?: number
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          monthly_streak?: number | null
+          streak?: number
+          tasks_completed_month?: number | null
+          tasks_completed_today?: number | null
+          tasks_completed_week?: number | null
+          time_spent_today?: number | null
+          time_spent_total?: number | null
+          total_tasks_completed?: number | null
           total_xp?: number
           updated_at?: string
           user_id?: string
+          weekly_streak?: number | null
         }
         Relationships: [
           {
