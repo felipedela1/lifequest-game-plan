@@ -1,4 +1,3 @@
-
 -- Create user profiles table
 CREATE TABLE public.profiles (
   id UUID NOT NULL REFERENCES auth.users ON DELETE CASCADE,
@@ -7,6 +6,7 @@ CREATE TABLE public.profiles (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   PRIMARY KEY (id)
 );
+
 -- Tabla base para plantillas de tareas
 CREATE TABLE public.demo_tasks (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -23,18 +23,19 @@ CREATE TABLE public.demo_tasks (
   recurring_interval INTEGER DEFAULT 1,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
--- Habilitar RLS
+
+-- Habilitar RLS y política de solo lectura en demo_tasks
 ALTER TABLE public.demo_tasks ENABLE ROW LEVEL SECURITY;
 
--- Política: todos los usuarios autenticados pueden ver demo_tasks
 CREATE POLICY "Todos pueden ver demo_tasks" ON public.demo_tasks
   FOR SELECT TO authenticated
   USING (true);
--- Create tasks table
+
+-- Create tasks table (con enlace a demo_tasks)
 CREATE TABLE public.tasks (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-  demo_task_id UUID REFERENCES public.demo_tasks(id), -- ← NUEVO: enlace con plantilla base
+  demo_task_id UUID REFERENCES public.demo_tasks(id), -- ← enlace con plantilla base
   title TEXT NOT NULL,
   description TEXT,
   xp_reward INTEGER NOT NULL DEFAULT 0,
@@ -56,7 +57,6 @@ CREATE TABLE public.tasks (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
-
 
 -- Create achievements table
 CREATE TABLE public.achievements (
@@ -106,7 +106,7 @@ ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_stats ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies for profiles
+-- RLS policies for profiles
 CREATE POLICY "Users can view their own profile" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
 
@@ -116,7 +116,7 @@ CREATE POLICY "Users can update their own profile" ON public.profiles
 CREATE POLICY "Users can insert their own profile" ON public.profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Create RLS policies for tasks
+-- RLS policies for tasks
 CREATE POLICY "Users can view their own tasks" ON public.tasks
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -129,14 +129,14 @@ CREATE POLICY "Users can update their own tasks" ON public.tasks
 CREATE POLICY "Users can delete their own tasks" ON public.tasks
   FOR DELETE USING (auth.uid() = user_id);
 
--- Create RLS policies for user_achievements
+-- RLS policies for user_achievements
 CREATE POLICY "Users can view their own achievements" ON public.user_achievements
   FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can create their own achievements" ON public.user_achievements
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- Create RLS policies for user_stats
+-- RLS policies for user_stats
 CREATE POLICY "Users can view their own stats" ON public.user_stats
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -167,7 +167,7 @@ BEGIN
 END;
 $$;
 
--- Create trigger for new user registration
+-- Trigger for new user registration
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
