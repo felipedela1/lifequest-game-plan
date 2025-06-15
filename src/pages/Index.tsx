@@ -82,6 +82,7 @@ const Index = () => {
 
   const handleCreateDemoTasks = async () => {
 
+
     const { data, error } = await supabase
       .from("demo_tasks")
       .select("*");
@@ -107,9 +108,8 @@ const Index = () => {
       return;
     }
 
-    const demoTasks = data || [];
-
-    if (demoTasks.length === 0) {
+    if (!data) {
+    const task = data;
       toast.error('No hay tareas de ejemplo disponibles');
       return;
 
