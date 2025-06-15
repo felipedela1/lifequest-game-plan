@@ -81,9 +81,26 @@ const Index = () => {
   };
 
   const handleCreateDemoTasks = async () => {
+
+
     const { data, error } = await supabase
-      .rpc('get_random_demo_task')
-      .single();
+      .from("demo_tasks")
+      .select("*");
+
+    if (error) {
+      console.error("Error fetching demo tasks:", error);
+      toast.error("No se pudieron cargar las tareas de ejemplo");
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      toast.error("No hay tareas de ejemplo disponibles");
+      return;
+    }
+
+    const task = data[Math.floor(Math.random() * data.length)];
+
+    const { data, error } = await supabase.from('demo_tasks').select('*');
 
     if (error) {
       console.error('Error fetching demo tasks:', error);
@@ -93,6 +110,11 @@ const Index = () => {
 
     if (!data) {
     const task = data;
+      toast.error('No hay tareas de ejemplo disponibles');
+      return;
+
+
+    if (demoTasks.length === 0) {
       toast.error('No hay tareas de ejemplo disponibles');
       return;
 
@@ -109,6 +131,7 @@ const Index = () => {
         notes: task.notes || undefined,
         xp_reward: task.xp_reward,
       });
+
 
     }
 
