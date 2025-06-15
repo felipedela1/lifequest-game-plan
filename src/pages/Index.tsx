@@ -114,6 +114,11 @@ const Index = () => {
       return;
 
 
+    if (demoTasks.length === 0) {
+      toast.error('No hay tareas de ejemplo disponibles');
+      return;
+
+
     for (const task of demoTasks) {
       await createTask({
         title: task.title,
@@ -126,6 +131,7 @@ const Index = () => {
         notes: task.notes || undefined,
         xp_reward: task.xp_reward,
       });
+
 
     }
 
