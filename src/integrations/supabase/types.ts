@@ -144,6 +144,54 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_tasks: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          estimated_duration: number | null
+          id: string
+          notes: string | null
+          priority: string | null
+          recurring_interval: number | null
+          recurring_type: string | null
+          tags: string[] | null
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          estimated_duration?: number | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          recurring_interval?: number | null
+          recurring_type?: string | null
+          tags?: string[] | null
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          estimated_duration?: number | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          recurring_interval?: number | null
+          recurring_type?: string | null
+          tags?: string[] | null
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       levels: {
         Row: {
           color: string | null
