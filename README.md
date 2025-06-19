@@ -41,7 +41,11 @@ npm run dev
 ```sh
 npm install
 npm run build
+
 npm start  # PORT will be provided by your host; locally run `PORT=3000 npm start`
+=======
+npm start
+
 ```
 
 **Edit a file directly in GitHub**
