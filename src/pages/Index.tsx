@@ -81,38 +81,119 @@ const Index = () => {
   };
 
   const handleCreateDemoTasks = async () => {
-    const handleCreateDemoTasks = async () => {
-      const { data: demoTasks, error } = await supabase
-        .from("demo_tasks")
-        .select("*");
+    const { data, error } = await supabase
+      .from("demo_tasks")
+      .select("*");
 
-      if (error) {
-        console.error("Error fetching demo tasks:", error);
-        toast.error("No se pudieron cargar las tareas de ejemplo");
-        return;
-      }
+    if (error) {
+      console.error("Error fetching demo tasks:", error);
+      toast.error("No se pudieron cargar las tareas de ejemplo");
+      return;
+    }
 
-      if (!demoTasks || demoTasks.length === 0) {
-        toast.error("No hay tareas de ejemplo disponibles");
-        return;
-      }
+    if (!data || data.length === 0) {
+      toast.error("No hay tareas de ejemplo disponibles");
+      return;
+    }
 
-      const task = demoTasks[Math.floor(Math.random() * demoTasks.length)];
+    const task = data[Math.floor(Math.random() * data.length)];
 
-      await createTask({
-        title: task.title,
-        description: task.description || undefined,
-        category: task.category,
-        priority: task.priority || undefined,
-        difficulty: task.difficulty || undefined,
-        estimated_duration: task.estimated_duration || undefined,
-        tags: task.tags || undefined,
-        notes: task.notes || undefined,
-        xp_reward: task.xp_reward,
-      });
+    await createTask({
+      title: task.title,
+      description: task.description || undefined,
+      category: task.category,
+      priority: task.priority || undefined,
+      difficulty: task.difficulty || undefined,
+      estimated_duration: task.estimated_duration || undefined,
+      tags: task.tags || undefined,
+      notes: task.notes || undefined,
+      xp_reward: task.xp_reward,
+    });
 
-      toast.success("¡Tarea de ejemplo creada!");
-    };
+    toast.success("¡Tarea de ejemplo creada!");
   };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
+  if (authLoading || statsLoading || tasksLoading || achievementsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl">Cargando...</div>
+      </div>
+    );
+  }
+
+  if (!user || !stats) {
+    return null;
+  }
+
+  const completedTasks = tasks.filter((task) => task.completed).length;
+  const totalTasks = tasks.length;
+  const allTasksCompleted = tasks.length > 0 && completedTasks === tasks.length;
+
+  return (
+    <div className="min-h-screen p-4 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nueva Tarea
+            </Button>
+            {(tasks.length === 0 || allTasksCompleted) && (
+              <Button onClick={handleCreateDemoTasks} variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                {tasks.length === 0
+                  ? "Crear tareas de ejemplo"
+                  : "Crear nuevas tareas diarias"}
+              </Button>
+            )}
+          </div>
+          <Button onClick={handleSignOut} variant="outline">
+            <LogOut className="w-4 h-4 mr-2" />
+            Cerrar sesión
+          </Button>
+        </div>
+
+        <Header
+          userLevel={stats.level}
+          currentXP={stats.current_xp}
+          xpToNextLevel={calculateXPToNextLevel(stats.level, stats.current_xp)}
+          userName={
+            user.user_metadata?.username ||
+            user.email?.split("@")[0] ||
+            "Aventurero"
+          }
+        />
+
+        <StatsOverview
+          tasksCompleted={completedTasks}
+          totalTasks={totalTasks}
+          streak={stats.streak}
+          totalXP={stats.total_xp}
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <DailyTasks tasks={tasks} onTaskComplete={handleTaskComplete} />
+          <Achievements achievements={achievements} />
+        </div>
+
+        <ProgressChart />
+
+        {showCreateForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <CreateTaskForm onClose={() => setShowCreateForm(false)} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
+
 export default Index;
