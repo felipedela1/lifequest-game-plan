@@ -36,6 +36,14 @@ npm i
 npm run dev
 ```
 
+### Build for production
+
+```sh
+npm install
+npm run build
+npm start
+```
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
