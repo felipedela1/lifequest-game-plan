@@ -23,9 +23,11 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password, username);
+        const { data, error } = await signUp(email, password, username);
         if (error) {
           toast.error(error.message);
+        } else if (!data?.user) {
+          toast.error('El correo electrónico ya está registrado. Por favor inicia sesión.');
         } else {
           toast.success('¡Cuenta creada! Revisa tu email para confirmar tu cuenta.');
         }
