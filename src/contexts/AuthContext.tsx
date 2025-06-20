@@ -10,7 +10,7 @@ interface AuthContextType {
     email: string,
     password: string,
     username?: string
-  ) => Promise<{ error: any }>;
+  ) => Promise<{ data: any; error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -57,8 +57,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string,
     username?: string,
   ) => {
-    // Usar la URL actual completa para redirect
-    const redirectUrl = `${window.location.origin}/confirm-password?confirmed=true`;
+    // Use the current origin for the redirect
+    const redirectUrl = `${window.location.origin}/?confirmed=true`;
 
     const { data, error } = await supabase.auth.signUp({
       email,
