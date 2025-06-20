@@ -10,7 +10,7 @@ interface AuthContextType {
     email: string,
     password: string,
     username?: string
-  ) => Promise<{ error: any }>;
+  ) => Promise<{ data: any; error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
