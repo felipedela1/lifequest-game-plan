@@ -57,8 +57,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string,
     username?: string,
   ) => {
-    // Usar la URL actual completa para redirect
-    const redirectUrl = `${window.location.origin}/confirm-password?confirmed=true`;
+    // Use the current origin for the redirect
+    const redirectUrl = `${window.location.origin}/?confirmed=true`;
 
     const { data, error } = await supabase.auth.signUp({
       email,
